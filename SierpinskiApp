@@ -1,0 +1,84 @@
+import javafx.application.Application;
+import javafx.scene.Group;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
+import javafx.stage.Stage;
+
+
+public class SierpinskiApp extends Application {
+
+    private Group root;
+    private Canvas canvas;
+    private GraphicsContext gc;
+    private int iteration;
+
+    public Parent initRoot() {
+        iteration = 0;
+        canvas = new Canvas(1200, 1000);
+        gc = canvas.getGraphicsContext2D();
+        root = new Group();
+        root.getChildren().addAll(canvas);
+        root.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                if (iteration >= 9)
+                    return;
+                makeFractal(iteration, 1000, 100, 900);
+                iteration++;
+            }
+            if (event.getButton() == MouseButton.SECONDARY) {
+                if (iteration <= 0)
+                    return;
+                removeLayer(iteration - 1);
+                iteration--;
+            }
+        });
+        return root;
+    }
+
+    /*
+     * iter == 0 is just equilateral triangle.
+     * x,y is bottom left vertex
+     */
+    public void makeFractal(int iter, double len, double x, double y) {
+        if (iter == 0) {
+            drawTriangle(len, x, y);
+            return;
+        }
+        makeFractal(iter - 1, 0.5 * len, x, y);
+        makeFractal(iter - 1, 0.5 * len, x + 0.5 * len, y);
+        makeFractal(iter - 1, 0.5 * len, x + 0.25 * len, y - Math.sqrt(3) * 0.25 * len);
+    }
+
+    /*
+     * 3^iter triangles are added to root for each iteration.
+     * removeLayer runs loop removing the last child
+     * from getChildren() 3^iter times.
+     */
+    public void removeLayer(int iter) {
+        for (int i = 0; i < Math.pow(3, iter); i++) {
+            root.getChildren().remove(root.getChildren().size() - 1);
+        }
+    }
+
+    //equilateral triangle
+    public void drawTriangle(double len, double x, double y) {
+        Polygon triangle = new Polygon(x, y,
+                x + len, y,
+                x + 0.5 * len, y - (Math.sqrt(3) * 0.5) * len);
+        triangle.setFill(null);
+        triangle.setStroke(Color.BLACK);
+
+        root.getChildren().addAll(triangle);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        primaryStage.setScene(new Scene(initRoot()));
+        primaryStage.show();
+    }
+}

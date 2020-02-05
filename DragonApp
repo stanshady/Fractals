@@ -1,3 +1,8 @@
+package Fractals;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -5,7 +10,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -30,18 +37,19 @@ public class DragonApp extends Application {
         fillPanes();
         root.getChildren().addAll(panes[0]);
 
+
         iteration = 0;
         root.setOnMouseClicked(event -> {
-            if(event.getButton() == MouseButton.PRIMARY) {
+            if (event.getButton() == MouseButton.PRIMARY) {
                 if (iteration >= MAX_ITERATION - 1)
                     return;
+
+                //animateNextIteration(baseLine, baseLine.scale(), baseLine.rotateAndScale(false).buildNewLine(false), false);
 
                 iterationPlusPlus();
                 root.getChildren().clear();
                 root.getChildren().addAll(panes[iteration]);
-            }
-
-            else if(event.getButton() == MouseButton.SECONDARY) {
+            } else if (event.getButton() == MouseButton.SECONDARY) {
                 if (iteration <= 0)
                     return;
 
@@ -54,24 +62,24 @@ public class DragonApp extends Application {
         return root;
     }
 
-    public void iterationPlusPlus(){
+    public void iterationPlusPlus() {
         iteration++;
     }
 
-    public void iterationMinusMinus(){
+    public void iterationMinusMinus() {
         iteration--;
     }
 
     //Run updateCurve MAX_ITERATION times and fill
     //panes[i] with a dragoncurve of i iterations.
-    public void fillPanes(){
+    public void fillPanes() {
         panes = new Pane[MAX_ITERATION];
 
         Pane pane = new Pane();
         pane.getChildren().addAll(dragonCurve);
         panes[0] = pane;
 
-        for(int i = 1; i < MAX_ITERATION; i++){
+        for (int i = 1; i < MAX_ITERATION; i++) {
             updateCurve();
             pane = new Pane();
             pane.getChildren().addAll(dragonCurve);
@@ -86,21 +94,7 @@ public class DragonApp extends Application {
 
         for (DragonLine line : dragonCurve) {
             DragonLine nextLine0 = line.rotateAndScale(positive);
-            DragonLine nextLine1;
-
-            if (positive) {
-                nextLine1 = new DragonLine(nextLine0.getEndX(),
-                        nextLine0.getEndY(),
-                        nextLine0.getEndX() + nextLine0.dist() * Math.cos(((nextLine0.angle - 2) % 8) * Math.PI * 0.25),
-                        nextLine0.getEndY() - nextLine0.dist() * Math.sin(((nextLine0.angle - 2) % 8) * Math.PI * 0.25),
-                        (nextLine0.angle - 2) % 8);
-            } else {
-                nextLine1 = new DragonLine(nextLine0.getEndX(),
-                        nextLine0.getEndY(),
-                        nextLine0.getEndX() + nextLine0.dist() * Math.cos(((nextLine0.angle + 2) % 8) * Math.PI * 0.25),
-                        nextLine0.getEndY() - nextLine0.dist() * Math.sin(((nextLine0.angle + 2) % 8) * Math.PI * 0.25),
-                        (nextLine0.angle + 2) % 8);
-            }
+            DragonLine nextLine1 = nextLine0.buildNewLine(positive);
 
             nextLayer.add(nextLine0);
             nextLayer.add(nextLine1);
@@ -109,6 +103,54 @@ public class DragonApp extends Application {
 
         dragonCurve.clear();
         dragonCurve = nextLayer;
+    }
+
+    public void animateNextIteration(DragonLine original,
+                                     DragonLine scaled,
+                                     DragonLine newLine,
+                                     boolean positive) {
+
+        Timeline tlScale, tlRotate, tlNewLine;
+
+        tlScale = new Timeline();
+        KeyFrame endFrame = new KeyFrame(Duration.millis(1000),
+                new KeyValue(original.endXProperty(), scaled.getEndX()),
+                new KeyValue(original.endYProperty(), scaled.getEndY()));
+        tlScale.getKeyFrames().addAll(endFrame);
+        tlScale.play();
+
+
+        Rotate rotate = new Rotate(original.angle, original.getStartX(), original.getStartY());
+        original.getTransforms().add(rotate);
+        double newAngle;
+        if (positive)
+            newAngle = original.angle - 45;
+        else
+            newAngle = original.angle + 45;
+
+        tlRotate = new Timeline();
+        endFrame = new KeyFrame(Duration.millis(3000),
+                new KeyValue(rotate.angleProperty(), newAngle));
+        tlRotate.getKeyFrames().addAll(endFrame);
+        tlRotate.setDelay(Duration.millis(1000));
+        tlRotate.play();
+
+
+        tlNewLine = new Timeline();
+        DragonLine temp = new DragonLine(newLine.getStartX(),
+                newLine.getStartY(),
+                newLine.getStartX(),
+                newLine.getStartY(), newLine.angle);
+
+        root.getChildren().addAll(temp);
+        endFrame = new KeyFrame(Duration.millis(3000),
+                new KeyValue(temp.endXProperty(), newLine.getEndX()),
+                new KeyValue(temp.endYProperty(), newLine.getEndY()));
+        tlNewLine.getKeyFrames().addAll(endFrame);
+        tlNewLine.setDelay(Duration.millis(5000));
+        tlNewLine.play();
+
+
     }
 
     private class DragonLine extends Line {
@@ -124,6 +166,18 @@ public class DragonApp extends Application {
         public double dist() {
             return Math.sqrt((this.getEndX() - this.getStartX()) * (this.getEndX() - this.getStartX()) +
                     (this.getEndY() - this.getStartY()) * (this.getEndY() - this.getStartY()));
+        }
+
+        public DragonLine scale() {
+            DragonLine ret = new DragonLine(0, 0, 0, 0, 0);
+            ret.setStartX(this.getStartX());
+            ret.setStartY(this.getStartY());
+            ret.setAngle(this.angle);
+
+            ret.setEndX(this.getStartX() + Math.sqrt(2) * 0.5 * this.dist() * Math.cos(this.angle * Math.PI * 0.25));
+            ret.setEndY(this.getStartY() - this.dist() * Math.sqrt(2) * 0.5 * Math.sin(this.angle * Math.PI * 0.25));
+            ret.setStroke(Color.RED);
+            return ret;
         }
 
         //positive is counter-clockwise
@@ -150,15 +204,44 @@ public class DragonApp extends Application {
             return ret;
         }
 
+        public DragonLine buildNewLine(boolean positive) {
+            DragonLine ret = new DragonLine(0, 0, 0, 0, 0);
+
+            double x = this.getEndX();
+            double y = this.getEndY();
+
+            ret.setStartX(x);
+            ret.setStartY(y);
+            double dist = this.dist();
+
+            if (positive) {
+                ret = new DragonLine(x,
+                        y,
+                        x + dist() * Math.cos(((this.angle - 2) % 8) * Math.PI * 0.25),
+                        y - dist() * Math.sin(((this.angle - 2) % 8) * Math.PI * 0.25),
+                        (this.angle - 2) % 8);
+            } else {
+                ret = new DragonLine(x,
+                        y,
+                        x + dist() * Math.cos(((this.angle + 2) % 8) * Math.PI * 0.25),
+                        y - dist() * Math.sin(((this.angle + 2) % 8) * Math.PI * 0.25),
+                        (this.angle + 2) % 8);
+            }
+            return ret;
+        }
+
         public void setAngle(int angle) {
             this.angle = angle;
         }
     }
 
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setScene(new Scene(initRoot()));
         primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

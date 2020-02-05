@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
-public class Dragon extends Application {
+public class DragonApp extends Application {
 
     private Pane root;
     private ArrayList<DragonLine> dragonCurve;
@@ -23,7 +23,7 @@ public class Dragon extends Application {
         dragonCurve = new ArrayList<>();
 
         //baseLine is initial line at iteration == 0
-        DragonLine baseLine = new DragonLine(250, 400, 750, 400, 0);
+        DragonLine baseLine = new DragonLine(250, 300, 750, 300, 0);
         baseLine.setStroke(Color.BLACK);
         dragonCurve.add(baseLine);
 
@@ -76,7 +76,7 @@ public class Dragon extends Application {
             pane = new Pane();
             pane.getChildren().addAll(dragonCurve);
             panes[i] = pane;
-            }
+        }
     }
 
     public void updateCurve() {

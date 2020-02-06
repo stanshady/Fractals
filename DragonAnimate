@@ -63,7 +63,7 @@ public class DragonApp extends Application {
                 updateCurve();
                 iterationPlusPlus();
 
-
+/*
                 Group group = new Group();
                 group.getChildren().addAll(dragonCurve);
                 group.setOpacity(0);
@@ -77,7 +77,7 @@ public class DragonApp extends Application {
                 timeline.getKeyFrames().addAll(keyFrame);
                 timeline.setDelay(Duration.millis(1700));
                 timeline.play();
-
+*/
                 //root.getChildren().clear();
                 //root.getChildren().addAll(panes[iteration]);
             } else if (event.getButton() == MouseButton.SECONDARY) {
@@ -183,7 +183,7 @@ public class DragonApp extends Application {
         tlNewLine.getKeyFrames().addAll(endFrame);
         tlNewLine.setDelay(Duration.millis(1200));
         tlNewLine.play();
-
+/*
         //fadeout timeline
         Timeline fadeout = new Timeline();
         endFrame = new KeyFrame(Duration.millis(1),
@@ -192,7 +192,7 @@ public class DragonApp extends Application {
         fadeout.getKeyFrames().addAll(endFrame);
         fadeout.setDelay(Duration.millis(1700));
         fadeout.play();
-
+*/
 
     }
 

@@ -156,7 +156,16 @@ public class DragonAnimate extends Application {
                 newLine.getStartY(),
                 newLine.getStartX(),
                 newLine.getStartY(), newLine.angle * 45);
+        temp.setOpacity(0);
         root.getChildren().addAll(temp);
+
+        //in order to hide the dots that are made from temp
+        Timeline hideTemp = new Timeline();
+        KeyFrame end = new KeyFrame(Duration.millis(1),
+                new KeyValue(temp.opacityProperty(),1));
+        hideTemp.getKeyFrames().addAll(end);
+        hideTemp.setDelay(Duration.millis(1200));
+        hideTemp.play();
 
         endFrame = new KeyFrame(Duration.millis(500),
                 new KeyValue(temp.endXProperty(), newLine.getEndX()),

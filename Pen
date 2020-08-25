@@ -1,0 +1,158 @@
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
+
+public class Pen {
+    private Pane root;
+    private double x, y, angle, strokeWidth;
+    private Color color;
+    private boolean down;
+
+    Pen(Pane root) {
+        this.root = root;
+        x = 0;
+        y = 0;
+        angle = 0;
+        color = Color.BLACK;
+        strokeWidth = 1;
+        down = false;
+    }
+
+    Pen(Pane root, double x, double y, double angle) {
+        this.root = root;
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        color = Color.BLACK;
+        strokeWidth = 1;
+        down = false;
+    }
+
+    Pen(Pane root, double x, double y, double angle, Color color, double strokeWidth) {
+        this.root = root;
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.color = color;
+        this.strokeWidth = strokeWidth;
+        down = false;
+    }
+
+    public void move(double x, double y) {
+        if (down) {
+            Line line = new Line(this.x, this.y, x, y);
+            line.setStroke(color);
+            line.setStrokeWidth(strokeWidth);
+            root.getChildren().addAll(line);
+        }
+        this.x = x;
+        this.y = y;
+    }
+
+    public void forward(double length) {
+        if (down) {
+            Line line = new Line(this.x,
+                    this.y,
+                    this.x + length * Math.cos(angle * Math.PI / 180),
+                    this.y - length * Math.sin(angle * Math.PI / 180));
+            line.setStroke(color);
+            line.setStrokeWidth(strokeWidth);
+            root.getChildren().addAll(line);
+        }
+        this.x = this.x + length * Math.cos(angle * Math.PI / 180);
+        this.y = this.y - length * Math.sin(angle * Math.PI / 180);
+    }
+
+    public void drawRectangle(double width, double height) {
+        if (down) {
+            Rectangle rectangle = new Rectangle(this.x, this.y, width, height);
+            rectangle.setFill(null);
+            rectangle.setStroke(color);
+            rectangle.setStrokeWidth(strokeWidth);
+            root.getChildren().addAll(rectangle);
+        }
+    }
+
+    public void drawCircle(double radius) {
+        if (down) {
+            Ellipse circle = new Ellipse(this.x, this.y, radius, radius);
+            circle.setFill(null);
+            circle.setStroke(color);
+            circle.setStrokeWidth(strokeWidth);
+            root.getChildren().addAll(circle);
+        }
+    }
+
+    public void drawEllipse(double xRadius, double yRadius) {
+        if (down) {
+            Ellipse ellipse = new Ellipse(this.x, this.y, xRadius, yRadius);
+            ellipse.setFill(null);
+            ellipse.setStroke(color);
+            ellipse.setStrokeWidth(strokeWidth);
+            root.getChildren().addAll(ellipse);
+        }
+    }
+
+    public void turnRight(double angle) {
+        this.angle -= angle;
+    }
+
+    public void turnLeft(double angle) {
+        this.angle += angle;
+    }
+
+    public void down() {
+        down = true;
+    }
+
+    public void up() {
+        down = false;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void setStrokeWidth(double strokeWidth) {
+        this.strokeWidth = strokeWidth;
+    }
+
+    public double getStrokeWidth() {
+        return strokeWidth;
+    }
+
+    public String toString() {
+        return "(x,y): (" + x + ", " + y + ")\n" +
+                "Angle: " + angle;
+    }
+}
